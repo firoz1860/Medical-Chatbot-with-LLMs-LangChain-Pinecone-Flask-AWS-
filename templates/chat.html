@@ -1,81 +1,103 @@
-<link href="//maxcdn.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css" rel="stylesheet" id="bootstrap-css">
-<script src="//maxcdn.bootstrapcdn.com/bootstrap/4.1.1/js/bootstrap.min.js"></script>
-<script src="//cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0f766e">
+  <title>MedBot | Medical knowledge assistant</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <main class="app-shell">
+    <section class="chat-card" aria-label="Medical chatbot">
+      <header class="chat-header">
+        <div class="brand-mark" aria-hidden="true">+</div>
+        <div class="brand-copy">
+          <p class="eyebrow">Medical knowledge assistant</p>
+          <h1>MedBot</h1>
+        </div>
+        <span class="service-badge"><span></span> RAG enabled</span>
+      </header>
 
-<!DOCTYPE html>
-<html>
-	<head>
-		<title>Chatbot</title>
-		<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
-		<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.5.0/css/all.css" integrity="sha384-B4dIYHKNBt8Bc12p+WXckhzcICo0wtJAoU8YZTY5qE0Id1GSseTk6S+L3BlXeVIU" crossorigin="anonymous">
-		<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
-		<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css')}}"/>
-	</head>
-	
-	
-	<body>
-		<div class="container-fluid h-100">
-			<div class="row justify-content-center h-100">		
-				<div class="col-md-8 col-xl-6 chat">
-					<div class="card">
-						<div class="card-header msg_head">
-							<div class="d-flex bd-highlight">
-								<div class="img_cont">
-									<img src="https://cdn-icons-png.flaticon.com/512/387/387569.png" class="rounded-circle user_img">
-									<!-- <img src="https://www.prdistribution.com/spirit/uploads/pressreleases/2019/newsreleases/d83341deb75c4c4f6b113f27b1e42cd8-chatbot-florence-already-helps-thousands-of-patients-to-remember-their-medication.png" class="rounded-circle user_img"> -->
-									<span class="online_icon"></span>
-								</div>
-								<div class="user_info">
-									<span>Medical Chatbot</span>
-									<p>Ask me anything!</p>
-								</div>
-							</div>
-						</div>
-						<div id="messageFormeight" class="card-body msg_card_body">
-							
-							
-						</div>
-						<div class="card-footer">
-							<form id="messageArea" class="input-group">
-                                <input type="text" id="text" name="msg" placeholder="Type your message..." autocomplete="off" class="form-control type_msg" required/>
-								<div class="input-group-append">
-									<button type="submit" id="send" class="input-group-text send_btn"><i class="fas fa-location-arrow"></i></button>
-								</div>
-							</form>
-						</div>
-					</div>
-				</div>
-			</div>
-		</div>
-		
-		<script>
-			$(document).ready(function() {
-				$("#messageArea").on("submit", function(event) {
-					const date = new Date();
-					const hour = date.getHours();
-					const minute = date.getMinutes();
-					const str_time = hour+":"+minute;
-					var rawText = $("#text").val();
+      <div id="messages" class="messages" aria-live="polite" aria-relevant="additions">
+        <article class="message message--bot">
+          <div class="avatar" aria-hidden="true">M</div>
+          <div>
+            <p class="message-label">MedBot</p>
+            <div class="bubble">Hello ? I can answer questions using the medical documents in my knowledge base. Ask a clear question to get started.</div>
+          </div>
+        </article>
+      </div>
 
-					var userHtml = '<div class="d-flex justify-content-end mb-4"><div class="msg_cotainer_send">' + rawText + '<span class="msg_time_send">'+ str_time + '</span></div><div class="img_cont_msg"><img src="https://i.ibb.co/d5b84Xw/Untitled-design.png" class="rounded-circle user_img_msg"></div></div>';
-					
-					$("#text").val("");
-					$("#messageFormeight").append(userHtml);
+      <form id="chat-form" class="chat-form" novalidate>
+        <label class="sr-only" for="message">Your medical question</label>
+        <input id="message" name="msg" type="text" maxlength="2000" autocomplete="off" placeholder="Ask a medical question?" required>
+        <button id="submit-button" type="submit">
+          <span>Send</span><span aria-hidden="true">?</span>
+        </button>
+      </form>
+      <p id="feedback" class="feedback" role="status"></p>
+      <p class="disclaimer">MedBot can make mistakes and is not a substitute for a licensed medical professional.</p>
+    </section>
+  </main>
 
-					$.ajax({
-						data: {
-							msg: rawText,	
-						},
-						type: "POST",
-						url: "/get",
-					}).done(function(data) {
-						var botHtml = '<div class="d-flex justify-content-start mb-4"><div class="img_cont_msg"><img src="https://cdn-icons-png.flaticon.com/512/387/387569.png" class="rounded-circle user_img_msg"></div><div class="msg_cotainer">' + data + '<span class="msg_time">' + str_time + '</span></div></div>';
-						$("#messageFormeight").append($.parseHTML(botHtml));
-					});
-					event.preventDefault();
-				});
-			});
-		</script>
-        
-    </body>
+  <script>
+    const form = document.getElementById('chat-form');
+    const input = document.getElementById('message');
+    const messages = document.getElementById('messages');
+    const submitButton = document.getElementById('submit-button');
+    const feedback = document.getElementById('feedback');
+
+    function addMessage(role, text) {
+      const article = document.createElement('article');
+      article.className = `message message--${role}`;
+
+      const avatar = document.createElement('div');
+      avatar.className = 'avatar';
+      avatar.setAttribute('aria-hidden', 'true');
+      avatar.textContent = role === 'user' ? 'You' : 'M';
+
+      const content = document.createElement('div');
+      const label = document.createElement('p');
+      label.className = 'message-label';
+      label.textContent = role === 'user' ? 'You' : 'MedBot';
+
+      const bubble = document.createElement('div');
+      bubble.className = 'bubble';
+      bubble.textContent = text;
+
+      content.append(label, bubble);
+      article.append(avatar, content);
+      messages.append(article);
+      messages.scrollTop = messages.scrollHeight;
+    }
+
+    form.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      const message = input.value.trim();
+      if (!message || submitButton.disabled) return;
+
+      addMessage('user', message);
+      input.value = '';
+      input.disabled = true;
+      submitButton.disabled = true;
+      feedback.textContent = 'Searching the medical knowledge base?';
+
+      try {
+        const response = await fetch('/get', { method: 'POST', body: new FormData(form) });
+        const answer = (await response.text()).trim();
+        if (!response.ok) throw new Error(answer || 'The service could not complete that request.');
+        addMessage('bot', answer);
+        feedback.textContent = '';
+      } catch (error) {
+        addMessage('bot', error.message || 'The service could not complete that request.');
+        feedback.textContent = 'You can try your question again in a moment.';
+      } finally {
+        input.disabled = false;
+        submitButton.disabled = false;
+        input.focus();
+      }
+    });
+  </script>
+</body>
 </html>
